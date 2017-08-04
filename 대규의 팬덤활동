@@ -1,0 +1,64 @@
+#include "stdafx.h"
+#include <iostream>
+using namespace std;
+#define MAX_L 10
+#define MAX_N 100+1
+
+int T, N;
+int use[10] = { 0, };  // 0, 1, 2, ... 9 bit
+int Dp[MAX_L/*last*/][MAX_N/*num*/];
+
+#define abs_minus(a,b) (a>b) ? a - b : b - a;
+
+int solve(int last, int cur_idx, int num)
+{
+	int ret = 0;
+	if (num == 0) {
+		for (int i = 0; i < 10; i++) {
+			if (use[i] == 0) {
+				return 0;
+			}
+		}
+
+		return 1;
+	}
+	
+	if (cur_idx == 0) {
+		for (int i = 1; i <= 9; i++) {
+
+			use[i] = 1;
+			ret += solve(i, cur_idx + 1, num - 1);
+			use[i] = 0;
+		}
+	}
+	else {
+
+		int candidate = last - 1;
+		if (candidate >= 0) {
+			use[candidate] = 1;
+			ret += solve(candidate, cur_idx + 1, num - 1);			
+			use[candidate] = 0;
+		}
+
+		candidate = last + 1;
+		if (candidate <= 9) {
+			use[candidate] = 1;
+			ret += solve(candidate, cur_idx + 1, num - 1);
+			use[candidate] = 0;
+		}
+	}
+
+	return ret;
+}
+
+int main()
+{
+	cin >> T;
+
+	while (T--) {
+		cin >> N;
+
+		memset(Dp, -1, sizeof(Dp));
+		cout << solve(0, 0, N) % 1000000000 << endl;
+	};
+}

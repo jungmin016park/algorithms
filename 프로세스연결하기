@@ -1,0 +1,148 @@
+최대한 많은 Core에 전원을 연결하였을 경우, 전선 길이의 합을 구하고자 한다.
+
+   단, 여러 방법이 있을 경우, 전선 길이의 합이 최소가 되는 값을 구하라.
+
+위 예제의 정답은 12가 된다.
+
+ 
+
+[제약 사항]
+
+1. 7 ≤  N ≤ 12
+
+2. Core의 개수는 최소 1개 이상 12개 이하이다.
+
+3. 최대한 많은 Core에 전원을 연결해도, 전원이 연결되지 않는 Core가 존재할 수 있다.
+
+ 
+
+ 
+
+ 
+
+[입력]
+
+입력의 가장 첫 줄에는 총 테스트 케이스의 개수 T가 주어지며 그 다음 줄부터 각 테스트 케이스가 주어진다. 각 테스트 케이스의 첫 줄에는 N값이 주어지며, 다음 N줄에 걸쳐서 멕시노스의 초기 상태가 N x N 배열로 주어진다. 0은 빈 cell을 의미하며, 1은 core를 의미하고, 그 외의 숫자는 주어지지 않는다.
+
+ 
+
+ 
+
+[출력]
+
+각 테스트 케이스마다 '#X'를 찍고, 한 칸 띄고, 정답을 출력한다.
+
+(X는 테스트 케이스의 번호를 의미하며 1부터 시작한다.)
+
+
+#include <stdio.h>
+ 
+#define MAX_N       (14)
+#define BLANK       (0)
+#define CORE        (1)
+#define WIRE        (2)
+#define BOUNDARY    (3)
+#define INF         (987654321)
+#define MIN(A,B)    ((A)<(B)?(A):(B))
+ 
+typedef struct {
+    int x, y;
+}Position;
+ 
+Position cores[MAX_N];
+ 
+int map[MAX_N][MAX_N];
+int numOfCore;
+int N;
+int minLength, maxCore;
+ 
+int dx[4] = { -1, 0, 1, 0 };
+int dy[4] = { 0, -1, 0, 1 };
+ 
+void initialize() {
+    register int i, j, k;
+    scanf("%d", &N);
+    minLength = INF;
+    maxCore = 0;
+    numOfCore = 0;
+ 
+    for (i = 0; i<MAX_N; i++) for (j = 0; j<MAX_N; j <= j++)    map[i][j] = BLANK;
+    for (i = 0; i <= N; i++) map[0][i] = BOUNDARY, map[N + 1][i] = BOUNDARY, map[i][0] = BOUNDARY, map[i][N + 1] = BOUNDARY;
+    for (i = 1; i <= N; i++) {
+        for (j = 1; j <= N; j <= j++) {
+            scanf(" %d", &map[i][j]);
+            if (map[i][j] == CORE) {
+                numOfCore++, cores[numOfCore].x = i, cores[numOfCore].y = j;
+            }
+        }
+    }
+}
+ 
+int isAvailable(Position core, int direction) {
+    register int nx = core.x + dx[direction], ny = core.y + dy[direction], length = 0;
+    while (nx>0 && ny>0 && nx <= N && ny <= N) {
+        if (map[nx][ny] == BLANK) nx += dx[direction], ny += dy[direction], length++;
+        else if (map[nx][ny] != BLANK) return 0;
+    }
+    return length;
+}
+void connectCore(Position core, int direction, int length) {
+    register int i;
+    for (i = 1; i <= length; i++) {
+        map[core.x + i*dx[direction]][core.y + i*dy[direction]] = WIRE;
+    }
+}
+ 
+void disconnectCore(Position core, int direction, int length) {
+    register int i;
+    for (i = 1; i <= length; i++) {
+        map[core.x + i*dx[direction]][core.y + i*dy[direction]] = BLANK;
+    }
+}
+ 
+void solve(int n, int wireLength, int connectedCore) {
+    int i, length;
+    if (n>numOfCore) {
+        if ((maxCore<connectedCore) || (maxCore == connectedCore && minLength>wireLength)) {
+            maxCore = connectedCore;
+            minLength = wireLength;
+        }
+        return;
+    }
+ 
+    for (i = 0; i<4; i++)
+    {
+        if (map[cores[n].x + dx[i]][cores[n].y + dy[i]] == BOUNDARY) {
+            solve(n + 1, wireLength, connectedCore + 1);
+            return;
+        }
+    }
+ 
+    for (i = 0; i<4; i++)
+    {
+        if (length = isAvailable(cores[n], i)) {
+            connectCore(cores[n], i, length);
+            solve(n + 1, length + wireLength, connectedCore + 1);
+            disconnectCore(cores[n], i, length);
+        }
+    }
+ 
+    solve(n + 1, wireLength, connectedCore);
+}
+ 
+int main(void)
+{
+    int test_case;
+    int T;
+ 
+    setbuf(stdout, NULL);
+    scanf("%d", &T);
+ 
+    for (test_case = 1; test_case <= T; ++test_case)
+    {
+        initialize();
+        solve(1, 0, 0);
+        printf("#%d %d\n", test_case, minLength);
+    }
+    return 0; //정상종료시 반드시 0을 리턴해야 합니다.
+}

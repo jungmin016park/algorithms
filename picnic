@@ -38,59 +38,69 @@ JongMan알고리즘 문제 해결 전략보기
 노트
 #endif
 
-#include "stdafx.h"
-#include <iostream>
-using namespace std;
-#define MAX_N 10
-
-int T, N, M;
-
-#define abs_minus(a,b) (a>b) ? a - b : b - a;
-
-int friends[MAX_N][MAX_N];
-int use[MAX_N];
-
-int solve(int num)
-{
-	int ret = 0;
-	if (num == 0) {
-		for (int i = 0; i < N; i++) {
-			if (use[i] == 0)
-				return 0;
-		}
-		return 1;
-	}
-
-	for (int i = 0; i < N; i++) {  // A
-		for (int j = 0; j < N; j++) {  // B
-			if (i == j) continue; 
-
-			if (friends[i][j] == 1 && !use[i] && !use[j]) {
-				use[i] = use[j] = 1;
-				ret += solve(num -2);
-				use[i] = use[j] = 0;
-			}
-		}
-	}
-
-	return ret;
+#include <stdio.h>
+#include <string.h>
+ 
+#pragma warning(disable:4996)
+ 
+int n, m;
+int edges[11][11];
+ 
+int checkBoard[11];
+int count;
+ 
+void getPossibleCount() {
+    /* pick p1 */
+    int p1 = -1;
+    for (int i = 0; i < n; i++) {
+        if (checkBoard[i] == -1) {
+            p1 = i;
+            checkBoard[p1]++;
+            break;
+        }
+    }
+ 
+    // Finally, possible case was just found. count++
+    if (p1 == -1) {
+        count++;
+        return;
+    }
+ 
+    /* pick p2 */
+    for (int i = 0; i < n; i++) {
+        if ((edges[p1][i] == 1) && (checkBoard[i] == -1)) {
+            checkBoard[i]++;
+            getPossibleCount();
+            checkBoard[i]--;
+        }
+    }
+ 
+    checkBoard[p1]--;
+}
+ 
+int main() {
+    int C;
+    scanf("%d", &C);
+ 
+    for (int i = 0; i < C; i++) {
+        scanf("%d %d", &n, &m);
+ 
+        // get edges
+        memset(edges, -1, sizeof(edges));
+        for (int j = 0; j < m; j++) {
+            int p1, p2;
+            scanf("%d %d", &p1, &p2);
+ 
+            edges[p1][p2] = edges[p2][p1] = 1;
+        }
+ 
+        // 
+        memset(checkBoard, -1, sizeof(checkBoard));
+        count = 0;
+        getPossibleCount();
+        printf("%d\n", count);
+    }
+ 
+    return 0;
 }
 
-int main()
-{
-	cin >> T;
-	int A, B;
-
-	while (T--) {
-		cin >> N;  // 학생수, 2 <= n <= 10
-		cin >> M;  // 친구쌍수, (0 <= m <= n*(n-1)/2)
-
-		for (int i = 0; i < M; i++) {
-			cin >> A >> B;
-			friends[A][B] = 1;
-			friends[B][A] = 1;
-		}
-				
-		cout << solve(N) << endl;
-	};
-}

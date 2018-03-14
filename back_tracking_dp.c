@@ -59,4 +59,89 @@
 */
 
 
-#include <stdio.h> int N, W; struct sStuff{    int Weight;    int Price;};struct sStuff Stuff[1001];  /*int ResultPriceSum = 0;void Process(int Cur, int WeightSum, int PriceSum){ if (Cur < N) {  // 현재것을 선택한 경우  if (WeightSum + Stuff[Cur].Weight < W)   Process(Cur + 1, WeightSum + Stuff[Cur].Weight, PriceSum + Stuff[Cur].Price);  // 현재것을 선택하지 않은 경우  Process(Cur + 1, WeightSum, PriceSum); }  if (ResultPriceSum < PriceSum)  ResultPriceSum = PriceSum;}*/  #define MAX(a,b) a>b?a:b   int ResultPriceSum = 0;int WeightSum[1001][10001];void DP_Process(){    for (int n = 0; n <= N; n++)        for (int w = 0; w <= W; w++)            WeightSum[n][w] = -1;     ResultPriceSum = Stuff[0].Price;     WeightSum[0][Stuff[0].Weight] = Stuff[0].Price; // 현재것을 선택한 경우    WeightSum[0][0] = 0;        // 현재것을 선택하지 않은 경우     for (int Cur = 1; Cur < N; Cur++)    {        for (int Weight = 0; Weight <= W; Weight++)            if (WeightSum[Cur - 1][Weight] != -1)            {                // 현재것을 선택한 경우                if (Weight + Stuff[Cur].Weight <= W)                {                    WeightSum[Cur][Weight + Stuff[Cur].Weight] = MAX(WeightSum[Cur][Weight + Stuff[Cur].Weight], WeightSum[Cur - 1][Weight] + Stuff[Cur].Price);                                         ResultPriceSum = MAX(ResultPriceSum, WeightSum[Cur][Weight + Stuff[Cur].Weight]);                                   }                 // 현재것을 선택하지 않은 경우                WeightSum[Cur][Weight] = MAX(WeightSum[Cur][Weight], WeightSum[Cur - 1][Weight]);                           }    }}   int main(){         setbuf(stdout, NULL);     scanf("%d %d", &N, &W);     for (int n = 0; n < N; n++)    {        scanf("%d %d", &Stuff[n].Weight, &Stuff[n].Price);        //  printf("%d %d\n",   Stuff[n].Weight, Stuff[n].Price);    }     DP_Process();     printf("%d", ResultPriceSum);}
+
+#include <stdio.h>
+ 
+int N, W;
+ 
+struct sStuff
+{
+    int Weight;
+    int Price;
+};
+struct sStuff Stuff[1001];
+ 
+ 
+/*
+int ResultPriceSum = 0;
+void Process(int Cur, int WeightSum, int PriceSum)
+{
+	if (Cur < N)
+	{
+		// 현재것을 선택한 경우
+		if (WeightSum + Stuff[Cur].Weight < W)
+			Process(Cur + 1, WeightSum + Stuff[Cur].Weight, PriceSum + Stuff[Cur].Price);
+		// 현재것을 선택하지 않은 경우
+		Process(Cur + 1, WeightSum, PriceSum);
+	}
+ 
+	if (ResultPriceSum < PriceSum)
+		ResultPriceSum = PriceSum;
+}
+*/
+ 
+ 
+#define MAX(a,b) a>b?a:b 
+ 
+ 
+int ResultPriceSum = 0;
+int WeightSum[1001][10001];
+void DP_Process()
+{
+    for (int n = 0; n <= N; n++)
+        for (int w = 0; w <= W; w++)
+            WeightSum[n][w] = -1;
+ 
+    ResultPriceSum = Stuff[0].Price;
+ 
+    WeightSum[0][Stuff[0].Weight] = Stuff[0].Price; // 현재것을 선택한 경우
+    WeightSum[0][0] = 0;        // 현재것을 선택하지 않은 경우
+ 
+    for (int Cur = 1; Cur < N; Cur++)
+    {
+        for (int Weight = 0; Weight <= W; Weight++)
+            if (WeightSum[Cur - 1][Weight] != -1)
+            {
+                // 현재것을 선택한 경우
+                if (Weight + Stuff[Cur].Weight <= W)
+                {
+                    WeightSum[Cur][Weight + Stuff[Cur].Weight] = MAX(WeightSum[Cur][Weight + Stuff[Cur].Weight], WeightSum[Cur - 1][Weight] + Stuff[Cur].Price);
+                     
+                    ResultPriceSum = MAX(ResultPriceSum, WeightSum[Cur][Weight + Stuff[Cur].Weight]);                   
+                }
+ 
+                // 현재것을 선택하지 않은 경우
+                WeightSum[Cur][Weight] = MAX(WeightSum[Cur][Weight], WeightSum[Cur - 1][Weight]);               
+            }
+    }
+}
+ 
+ 
+ 
+int main()
+{
+     
+    setbuf(stdout, NULL);
+ 
+    scanf("%d %d", &N, &W);
+ 
+    for (int n = 0; n < N; n++)
+    {
+        scanf("%d %d", &Stuff[n].Weight, &Stuff[n].Price);
+        //  printf("%d %d\n",   Stuff[n].Weight, Stuff[n].Price);
+    }
+ 
+    DP_Process();
+ 
+    printf("%d", ResultPriceSum);
+}
